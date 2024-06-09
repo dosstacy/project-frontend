@@ -1,12 +1,246 @@
-<html>
+<html lang="en">
 <head>
     <title>RPG</title>
-    <script src=https://code.jquery.com/jquery-3.6.0.min.js></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="/css/my.css" rel="stylesheet">
 </head>
 <body>
 <h1>RPG admin panel</h1>
 <h2>Accounts list:</h2>
+<table class="table" id="users-table">
+    <thead>
+    <tr>
+        <th>#</th>
+        <th>Name</th>
+        <th>Title</th>
+        <th>Race</th>
+        <th>Profession</th>
+        <th>Level</th>
+        <th>Birthday</th>
+        <th>Banned</th>
+        <th>Edit</th>
+        <th>Delete</th>
+    </tr>
+    </thead>
+    <tbody id="users-table-body"></tbody>
+</table>
 
+<label for="paging">Count per page: </label>
+<select class="paging" id="paging">
+    <option value="3">3</option>
+    <option value="9">9</option>
+    <option value="15">15</option>
+    <option value="20">20</option>
+</select>
+
+<div class="pagination" id="pagination"></div>
+
+<script>
+    let globalCount = 0;
+    let currentPage = 0;
+    let itemsPerPage = parseInt($("#paging").val());
+    const tableBody = $("#users-table-body");
+
+    $(document).ready(function () {
+        $.ajax({
+            url: '/rest/players/count',
+            method: 'GET',
+            success: function (response) {
+                globalCount = response;
+                createPageButtons();
+                showPage(currentPage);
+            }
+        });
+
+        $("#paging").change(function paging() {
+            itemsPerPage = parseInt($(this).val());
+            currentPage = 0;
+            createPageButtons();
+            showPage(currentPage);
+        });
+
+        let savedPage = localStorage.getItem('currentPage');
+        let savedCountPerPage = localStorage.getItem('countPerPage');
+        let pageUpdated = localStorage.getItem('pageUpdated');
+        let selectedValue = localStorage.getItem('selectedValue');
+
+        if (savedPage && pageUpdated && savedCountPerPage && selectedValue) {
+            currentPage = parseInt(savedPage);
+            itemsPerPage = parseInt(savedCountPerPage);
+            $('#paging').val(selectedValue);
+            showPage(currentPage);
+            localStorage.removeItem('pageUpdated');
+        }else{
+            showPage(0);
+        }
+    });
+
+    function showPage(page) {
+        $.ajax({
+            url: '/rest/players',
+            method: 'GET',
+            data: { pageNumber: page, pageSize: itemsPerPage },
+            success: function (response) {
+                tableBody.empty();
+                response.forEach(user => {
+                    const formattedDate = new Date(user.birthday).toLocaleDateString('en-US');
+                    const row = `
+                        <tr data-user-id="${user.id}">
+                            <td>${user.id}</td>
+                            <td class="name">${user.name}</td>
+                            <td class="title">${user.title}</td>
+                            <td class="race">${user.race}</td>
+                            <td class="profession">${user.profession}</td>
+                            <td>${user.level}</td>
+                            <td>${formattedDate}</td>
+                            <td class="banned">${user.banned}</td>
+                            <td>
+                                <button class="edit" type="button" onclick="editUser(event, ${user.id})"></button>                            </form>
+                            </td>
+                            <td>
+                                <form action="/rest/players/${user.id}" method="post" onsubmit="deleteUser(event, ${user.id})">
+                                    <button class="delete" type="submit"></button>
+                                </form>
+                            </td>
+                        </tr>
+                    `;
+                    tableBody.append(row);
+                });
+                updateActiveButtonStates();
+            }
+        });
+    }
+
+    function createPageButtons() {
+        const totalPages = Math.ceil(globalCount / itemsPerPage);
+        const paginationContainer = $("#pagination");
+        paginationContainer.empty();
+
+        for (let i = 0; i < totalPages; i++) {
+            const pageButton = $(`<button>${i + 1}</button>`);
+            pageButton.on('click', function () {
+                currentPage = i;
+                showPage(currentPage);
+                updateActiveButtonStates();
+            });
+            paginationContainer.append(pageButton);
+        }
+    }
+
+    function updateActiveButtonStates() {
+        const pageButtons = document.querySelectorAll('.pagination button');
+        pageButtons.forEach((button, index) => {
+            button.classList.toggle('active', index === currentPage);
+        });
+    }
+
+    function deleteUser(event, userId) {
+        event.preventDefault();
+        localStorage.setItem('currentPage', currentPage.toString());
+        localStorage.setItem('countPerPage', itemsPerPage.toString());
+        localStorage.setItem('pageUpdated', 'true');
+        localStorage.setItem('selectedValue', $('#paging').val());
+
+        $.ajax({
+            url: `/rest/players/${userId}`,
+            method: 'DELETE',
+            success: function () {
+                $(`tr[data-user-id='${userId}']`).remove();
+                location.reload();
+            }
+        });
+    }
+
+    let buttonClicked = false;
+
+    function editUser(event, userId){
+        const button = event.target;
+        button.classList.toggle('active');
+        const row = $(`tr[data-user-id='${userId}']`);
+
+        const nameField = $('<input>').attr('type', 'text').addClass('name-field');
+        console.log(nameField.val());
+        const nameCell = row.find('.name');
+        nameField.val(nameCell.text().trim());
+        nameCell.empty().append(nameField);
+
+        const titleField = $('<input>').attr('type', 'text').addClass('title-field');
+        const titleCell = row.find('.title');
+        titleField.val(titleCell.text().trim());
+        titleCell.empty().append(titleField);
+
+        const raceCell = row.find('.race');
+        const raceSelector = $('<select>').append(
+            $('<option>').val('HUMAN').text('HUMAN'),
+            $('<option>').val('DWARF').text('DWARF'),
+            $('<option>').val('ELF').text('ELF'),
+            $('<option>').val('GIANT').text('GIANT'),
+            $('<option>').val('ORC').text('ORC'),
+            $('<option>').val('TROLL').text('TROLL'),
+            $('<option>').val('HOBBIT').text('HOBBIT')
+        ).addClass('race-selector');
+        raceCell.empty().append(raceSelector);
+
+        const professionCell = row.find('.profession');
+        const professionSelector = $('<select>').append(
+            $('<option>').val('WARRIOR').text('WARRIOR'),
+            $('<option>').val('ROGUE').text('ROGUE'),
+            $('<option>').val('SORCERER').text('SORCERER'),
+            $('<option>').val('CLERIC').text('CLERIC'),
+            $('<option>').val('PALADIN').text('PALADIN'),
+            $('<option>').val('NAZGUL').text('NAZGUL'),
+            $('<option>').val('WARLOCK').text('WARLOCK'),
+            $('<option>').val('DRUID').text('DRUID')
+        ).addClass('profession-selector');
+        professionCell.empty().append(professionSelector);
+
+        const bannedCell = row.find('.banned');
+        const bannedSelector = $('<select>').append(
+            $('<option>').val('true').text('true'),
+            $('<option>').val('false').text('false')
+        ).addClass('banned-selector');
+        bannedCell.empty().append(bannedSelector);
+
+        const name = row.find('.name-field').val();
+        const title = row.find('.title-field').val();
+        const race = row.find('.race-selector').val();
+        const profession = row.find('.profession-selector').val();
+        const banned = row.find('.banned-selector').val();
+
+        const userData = {name, title, race, profession, banned};
+        const jsonData = JSON.stringify(userData);
+
+        if(!buttonClicked){
+            console.log("!buttonClicked");
+            buttonClicked = true;
+        } else {
+            console.log(userData);
+            console.log(jsonData);
+            saveUser(event, userId, jsonData);
+            console.log("buttonClicked");
+            buttonClicked = false;
+        }
+    }
+
+    function saveUser(event, userId, jsonData){
+        console.log("saveUser function");
+        event.preventDefault();
+
+        $.ajax({
+            url: `/rest/players/${userId}`,
+            method: 'POST',
+            contentType: 'application/json',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            data: jsonData,
+            success: function () {
+                console.log("saveUser function");
+                location.reload();
+            }
+        });
+    }
+</script>
 </body>
 </html>
