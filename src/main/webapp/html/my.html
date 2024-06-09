@@ -153,77 +153,75 @@
 
     let buttonClicked = false;
 
-    function editUser(event, userId){
+    function editUser(event, userId) {
         const button = event.target;
         button.classList.toggle('active');
         const row = $(`tr[data-user-id='${userId}']`);
 
-        const nameField = $('<input>').attr('type', 'text').addClass('name-field');
-        console.log(nameField.val());
-        const nameCell = row.find('.name');
-        nameField.val(nameCell.text().trim());
-        nameCell.empty().append(nameField);
+        if (!buttonClicked) {
+            const nameField = $('<input>').attr('type', 'text').addClass('name-field');
+            const nameCell = row.find('.name');
+            nameField.val(nameCell.text().trim());
+            nameCell.empty().append(nameField);
 
-        const titleField = $('<input>').attr('type', 'text').addClass('title-field');
-        const titleCell = row.find('.title');
-        titleField.val(titleCell.text().trim());
-        titleCell.empty().append(titleField);
+            const titleField = $('<input>').attr('type', 'text').addClass('title-field');
+            const titleCell = row.find('.title');
+            titleField.val(titleCell.text().trim());
+            titleCell.empty().append(titleField);
 
-        const raceCell = row.find('.race');
-        const raceSelector = $('<select>').append(
-            $('<option>').val('HUMAN').text('HUMAN'),
-            $('<option>').val('DWARF').text('DWARF'),
-            $('<option>').val('ELF').text('ELF'),
-            $('<option>').val('GIANT').text('GIANT'),
-            $('<option>').val('ORC').text('ORC'),
-            $('<option>').val('TROLL').text('TROLL'),
-            $('<option>').val('HOBBIT').text('HOBBIT')
-        ).addClass('race-selector');
-        raceCell.empty().append(raceSelector);
+            const raceCell = row.find('.race');
+            const raceSelector = $('<select>').append(
+                $('<option>').val('HUMAN').text('HUMAN'),
+                $('<option>').val('DWARF').text('DWARF'),
+                $('<option>').val('ELF').text('ELF'),
+                $('<option>').val('GIANT').text('GIANT'),
+                $('<option>').val('ORC').text('ORC'),
+                $('<option>').val('TROLL').text('TROLL'),
+                $('<option>').val('HOBBIT').text('HOBBIT')
+            ).addClass('race-selector');
+            raceSelector.val(raceCell.text().trim());
+            raceCell.empty().append(raceSelector);
 
-        const professionCell = row.find('.profession');
-        const professionSelector = $('<select>').append(
-            $('<option>').val('WARRIOR').text('WARRIOR'),
-            $('<option>').val('ROGUE').text('ROGUE'),
-            $('<option>').val('SORCERER').text('SORCERER'),
-            $('<option>').val('CLERIC').text('CLERIC'),
-            $('<option>').val('PALADIN').text('PALADIN'),
-            $('<option>').val('NAZGUL').text('NAZGUL'),
-            $('<option>').val('WARLOCK').text('WARLOCK'),
-            $('<option>').val('DRUID').text('DRUID')
-        ).addClass('profession-selector');
-        professionCell.empty().append(professionSelector);
+            const professionCell = row.find('.profession');
+            const professionSelector = $('<select>').append(
+                $('<option>').val('WARRIOR').text('WARRIOR'),
+                $('<option>').val('ROGUE').text('ROGUE'),
+                $('<option>').val('SORCERER').text('SORCERER'),
+                $('<option>').val('CLERIC').text('CLERIC'),
+                $('<option>').val('PALADIN').text('PALADIN'),
+                $('<option>').val('NAZGUL').text('NAZGUL'),
+                $('<option>').val('WARLOCK').text('WARLOCK'),
+                $('<option>').val('DRUID').text('DRUID')
+            ).addClass('profession-selector');
+            professionSelector.val(professionCell.text().trim());
+            professionCell.empty().append(professionSelector);
 
-        const bannedCell = row.find('.banned');
-        const bannedSelector = $('<select>').append(
-            $('<option>').val('true').text('true'),
-            $('<option>').val('false').text('false')
-        ).addClass('banned-selector');
-        bannedCell.empty().append(bannedSelector);
+            const bannedCell = row.find('.banned');
+            const bannedSelector = $('<select>').append(
+                $('<option>').val('true').text('true'),
+                $('<option>').val('false').text('false')
+            ).addClass('banned-selector');
+            bannedSelector.val(bannedCell.text().trim());
+            bannedCell.empty().append(bannedSelector);
 
-        const name = row.find('.name-field').val();
-        const title = row.find('.title-field').val();
-        const race = row.find('.race-selector').val();
-        const profession = row.find('.profession-selector').val();
-        const banned = row.find('.banned-selector').val();
-
-        const userData = {name, title, race, profession, banned};
-        const jsonData = JSON.stringify(userData);
-
-        if(!buttonClicked){
-            console.log("!buttonClicked");
             buttonClicked = true;
         } else {
+            const name = row.find('.name-field').val();
+            const title = row.find('.title-field').val();
+            const race = row.find('.race-selector').val();
+            const profession = row.find('.profession-selector').val();
+            const banned = row.find('.banned-selector').val();
+
+            const userData = { name, title, race, profession, banned };
             console.log(userData);
-            console.log(jsonData);
+            const jsonData = JSON.stringify(userData);
+
             saveUser(event, userId, jsonData);
-            console.log("buttonClicked");
             buttonClicked = false;
         }
     }
 
-    function saveUser(event, userId, jsonData){
-        console.log("saveUser function");
+    function saveUser(event, userId, jsonData) {
         event.preventDefault();
 
         $.ajax({
@@ -236,7 +234,6 @@
             },
             data: jsonData,
             success: function () {
-                console.log("saveUser function");
                 location.reload();
             }
         });
