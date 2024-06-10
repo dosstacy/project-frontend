@@ -7,31 +7,35 @@
 <body>
 <h1>RPG admin panel</h1>
 <h2>Accounts list:</h2>
-<table class="table" id="users-table">
-    <thead>
-    <tr>
-        <th>#</th>
-        <th>Name</th>
-        <th>Title</th>
-        <th>Race</th>
-        <th>Profession</th>
-        <th>Level</th>
-        <th>Birthday</th>
-        <th>Banned</th>
-        <th>Edit</th>
-        <th>Delete</th>
-    </tr>
-    </thead>
-    <tbody id="users-table-body"></tbody>
-</table>
+<div class="table-container">
+    <table id="users-table">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Title</th>
+            <th>Race</th>
+            <th>Profession</th>
+            <th>Level</th>
+            <th>Birthday</th>
+            <th>Banned</th>
+            <th>Edit</th>
+            <th>Delete</th>
+        </tr>
+        </thead>
+        <tbody id="users-table-body"></tbody>
+    </table>
+</div>
 
-<label for="paging">Count per page: </label>
-<select class="paging" id="paging">
-    <option value="3">3</option>
-    <option value="9">9</option>
-    <option value="15">15</option>
-    <option value="20">20</option>
-</select>
+<div class="count-per-page">
+    <label for="paging">Count per page: </label>
+    <select class="paging" id="paging">
+        <option value="3">3</option>
+        <option value="9">9</option>
+        <option value="15">15</option>
+        <option value="20">20</option>
+    </select>
+</div>
 
 <div class="pagination" id="pagination"></div>
 
@@ -98,9 +102,7 @@
                                 <button class="edit" type="button" onclick="editUser(event, ${user.id})"></button>
                             </td>
                             <td>
-                                <form action="/rest/players/${user.id}" method="post" onsubmit="deleteUser(event, ${user.id})">
-                                    <button class="delete" type="submit"></button>
-                                </form>
+                                <button class="delete" type="button" onclick="deleteUser(event, ${user.id})"></button>
                             </td>
                         </tr>
                     `;
@@ -276,51 +278,71 @@
     });
 </script>
 
+<br><br><hr>
+
 <br><br><span class="account-class" style="font-weight: bold; font-size: 1.5em;">Create new account:</span><br><br>
 
-<label for="name">Name: </label>
-<input type="text" id="name"><br>
-<label for="title">Title: </label>
-<input type="text" id="title"><br>
+<div class="new-account-fields">
+    <div class="name-input">
+        <label for="name">Name: </label>
+        <input type="text" id="name"><br>
+    </div>
+    <div class="title-input">
+        <label for="title">Title: </label>
+        <input type="text" id="title"><br>
+    </div>
 
-<label for="race">Race: </label>
-<select class="race" id="race">
-    <option value="HUMAN">HUMAN</option>
-    <option value="DWARF">DWARF</option>
-    <option value="ELF">ELF</option>
-    <option value="GIANT">GIANT</option>
-    <option value="ORC">ORC</option>
-    <option value="TROLL">TROLL</option>
-    <option value="HOBBIT">HOBBIT</option>
-</select><br>
+    <div class="race-input">
+        <label for="race">Race: </label>
+        <select class="race" id="race">
+            <option value="HUMAN">HUMAN</option>
+            <option value="DWARF">DWARF</option>
+            <option value="ELF">ELF</option>
+            <option value="GIANT">GIANT</option>
+            <option value="ORC">ORC</option>
+            <option value="TROLL">TROLL</option>
+            <option value="HOBBIT">HOBBIT</option>
+        </select><br>
+    </div>
 
-<label for="profession">Profession: </label>
-<select class="profession" id="profession">
-    <option value="WARRIOR">WARRIOR</option>
-    <option value="ROGUE">ROGUE</option>
-    <option value="SORCERER">SORCERER</option>
-    <option value="CLERIC">CLERIC</option>
-    <option value="PALADIN">PALADIN</option>
-    <option value="NAZGUL">NAZGUL</option>
-    <option value="WARLOCK">WARLOCK</option>
-    <option value="DRUID">DRUID</option>
-</select><br>
+    <div class="profession-input">
+        <label for="profession">Profession: </label>
+        <select class="profession" id="profession">
+            <option value="WARRIOR">WARRIOR</option>
+            <option value="ROGUE">ROGUE</option>
+            <option value="SORCERER">SORCERER</option>
+            <option value="CLERIC">CLERIC</option>
+            <option value="PALADIN">PALADIN</option>
+            <option value="NAZGUL">NAZGUL</option>
+            <option value="WARLOCK">WARLOCK</option>
+            <option value="DRUID">DRUID</option>
+        </select><br>
+    </div>
 
-<label for="level">Level: </label>
-<input type="text" id="level"><br>
+    <div class="level-input">
+        <label for="level">Level: </label>
+        <input type="text" id="level"><br>
+    </div>
 
-<label for="birthday">Birthday: </label>
-<input type="date" id="birthday"><br>
+    <div class="birthday-input">
+        <label for="birthday">Birthday: </label>
+        <input type="date" id="birthday"><br>
+    </div>
 
-<label for="banned">Banned: </label>
-<select class="banned" id="banned">
-    <option value="false">false</option>
-    <option value="true">true</option>
-</select><br><br>
+    <div class="banned-input">
+        <label for="banned">Banned: </label>
+        <select class="banned" id="banned">
+            <option value="false">false</option>
+            <option value="true">true</option>
+        </select><br><br>
+    </div>
 
-<form id="userForm">
-    <button class="addUser" type="submit">Save</button>
-</form>
+    <div class="user-form-input">
+        <form id="userForm">
+            <button class="addUser" type="submit">Save</button>
+        </form>
+    </div>
+</div>
 
 </body>
 </html>
